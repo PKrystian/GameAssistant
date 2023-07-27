@@ -1,15 +1,31 @@
-import customtkinter as cus
+import tkinter as tk
+import speech_recognition as sr
 
-class App(cus.CTk):
-    def __init__(self):
-        super().__init__()
-        self.geometry("400x150")
+def record_audio():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening")
+        audio = recognizer.listen(source, phrase_time_limit=5)
+    try:
+        text = recognizer.recognize_google(audio)
+        output_text.set("Recorded: " + text)
+        print("Recorded: ", text)
+    except sr.UnknownValueError:
+        output_text.set("Could not understand audio")
+        print("Could not understand audio")
+    except sr.RequestError as e:
+        output_text.set("Error during transcription: {0}".format(e))
+        print("Error during transcription: {0}".format(e))
 
-        self.button = cus.CTkButton(self, text="my button", command=self.button_callbck)
-        self.button.pack(padx=20, pady=20)
+root = tk.Tk()
+root.title("Game Assistant v1")
+root.geometry("600x400")
 
-    def button_callbck(self):
-        print("button clicked")
+output_text = tk.StringVar()
+output_label = tk.Label(root, textvariable=output_text)
+output_label.pack(pady=10)
 
-app = App()
-app.mainloop()
+record_button = tk.Button(root, text="Record Audio", command=record_audio)
+record_button.pack(pady=20)
+
+root.mainloop()
