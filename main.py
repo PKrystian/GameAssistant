@@ -1,31 +1,46 @@
 import tkinter as tk
+import threading
 import speech_recognition as sr
+import pyttsx3
 
-def record_audio():
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        print("Listening")
-        audio = recognizer.listen(source, phrase_time_limit=5)
-    try:
-        text = recognizer.recognize_google(audio)
-        output_text.set("Recorded: " + text)
-        print("Recorded: ", text)
-    except sr.UnknownValueError:
-        output_text.set("Could not understand audio")
-        print("Could not understand audio")
-    except sr.RequestError as e:
-        output_text.set("Error during transcription: {0}".format(e))
-        print("Error during transcription: {0}".format(e))
+def listen_for_commands():
+    def start_listening():
+        recognizer = sr.Recognizer()
+        output_text.set('Listening')
+        while True:
+            with sr.Microphone() as source:
+                recognizer.adjust_for_ambient_noise(source, duration = 0.5)
+                audio = recognizer.listen(source, phrase_time_limit = 2)
+
+            try:
+                recognized_text = recognizer.recognize_google(audio)
+                if recognized_text:
+                    if 'say hello' in recognized_text.lower():
+                        text_to_voice('hello!')
+                    if 'set day' in recognized_text.lower():
+                        text_to_voice('time set to day')
+
+            except sr.UnknownValueError:
+                output_text.set('could not understand audio.')
+            except sr.RequestError as e:
+                output_text.set(f'error occurred during recognition: {e}')
+
+    threading.Thread(target=start_listening).start()
+
+def text_to_voice(text):
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()
 
 root = tk.Tk()
-root.title("Game Assistant v1")
-root.geometry("600x400")
+root.title('Game Assistant V2')
+root.geometry('900x600')
 
 output_text = tk.StringVar()
 output_label = tk.Label(root, textvariable=output_text)
-output_label.pack(pady=10)
+output_label.pack(pady = 10)
 
-record_button = tk.Button(root, text="Record Audio", command=record_audio)
-record_button.pack(pady=20)
+record_button = tk.Button(root, text='Start Listening', command=listen_for_commands)
+record_button.pack(pady = 20)
 
 root.mainloop()
