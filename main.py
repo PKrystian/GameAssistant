@@ -1,55 +1,59 @@
-import tkinter as tk
+import sys
 import threading
+import tkinter as tk
+import pyttsx3 as tts
 import speech_recognition as sr
-import pyttsx3
-import subprocess
 
-def listen_for_commands():
-    def start_listening():
-        recognizer = sr.Recognizer()
-        recognized_text = ''
-        last_command = ''
+ASSISTANT_NAME = 'circle'
+ASSISTANT_COMMAND = f'hey {ASSISTANT_NAME}'
+ASSISTANT_STOP = 'stop'
+
+class GameAssistant:
+    def __init__(self) -> None:
+        self.recognizer = sr.Recognizer()
+        self.voice = tts.init()
+        self.voice.setProperty('rate', 200)
+
+        self.root = tk.Tk()
+        self.root.title('Game Assistant V3')
+        self.root.geometry('900x600')
+        self.label = tk.Label(text = f'Listening ({ASSISTANT_COMMAND} to start)')
+        self.label.pack()
+
+        threading.Thread(target = self.game_assistant_init).start()
+
+        self.root.mainloop()
+
+    def game_assistant_init(self) -> None:
         while True:
-            output_text.set(recognized_text)
-            if recognized_text != None:
-                last_command = recognized_text
-            with sr.Microphone() as source:
-                recognizer.adjust_for_ambient_noise(source, duration = 0.5)
-                audio = recognizer.listen(source, phrase_time_limit = 2)
             try:
-                recognized_text = recognizer.recognize_google(audio)
-                if recognized_text:
-                    if 'say hello' in recognized_text.lower():
-                        text_to_voice('hello!')
-                    if 'set day' in recognized_text.lower():
-                        text_to_voice('time set to day')
-                    if 'open code' in recognized_text.lower():
-                        text_to_voice('opening vscode, enjoy coding')
-                        try:
-                            subprocess.run(['code'])
-                        except FileNotFoundError:
-                            text_to_voice('Program VScode wasn\'t found')
-            except sr.UnknownValueError:
-                output_text.set('could not understand audio.')
-            except sr.RequestError as e:
-                output_text.set(f'error occurred during recognition: {e}')
+                with sr.Microphone() as source:
+                    self.recognizer.adjust_for_ambient_noise(source, duration = 0.2)
+                    audio = self.recognizer.listen(source)
 
-    threading.Thread(target=start_listening).start()
+                    text = self.recognizer.recognize_google(audio)
+                    text = text.lower()
 
-def text_to_voice(text):
-    engine = pyttsx3.init()
-    engine.say(text)
-    engine.runAndWait()
+                    if ASSISTANT_COMMAND in text:
+                        self.label.config(text = 'Waiting for command')
+                        audio = self.recognizer.listen(source)
 
-root = tk.Tk()
-root.title('Game Assistant V2')
-root.geometry('900x600')
+                        text = self.recognizer.recognize_google(audio)
+                        text = text.lower()
 
-output_text = tk.StringVar()
-output_label = tk.Label(root, textvariable=output_text)
-output_label.pack(pady = 10)
+                        if text == ASSISTANT_STOP:
+                            self.voice.say('Goodbye!')
+                            self.voice.runAndWait()
+                            self.voice.stop()
+                            self.root.destroy()
+                            sys.exit()
+                        else:
+                            if text is not None:
+                                self.voice.say('TODO: text.json here')
+                                self.voice.runAndWait()
+                            self.label.config(text = 'Listening')
+            except:
+                self.label.config(text = f'Listening ({ASSISTANT_COMMAND} to start)')
+                continue
 
-record_button = tk.Button(root, text='Start Listening', command=listen_for_commands)
-record_button.pack(pady = 20)
-
-root.mainloop()
+GameAssistant()

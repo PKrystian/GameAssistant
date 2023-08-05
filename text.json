@@ -1,0 +1,28 @@
+{
+    "text": [
+        {
+            "tag": "greetings",
+            "input": [
+                "Hello",
+                "Hi",
+                "Welcome",
+                "What's up",
+                "How's it going"
+            ],
+            "output": [
+                "Hello! What can I do for you?"
+            ]
+        },
+        {
+            "tag": "farewells",
+            "input": [
+                "Goodbye",
+                "Bye",
+                "Farewell"
+            ],
+            "output": [
+                "Goodbye! Have an nice day!"
+            ]
+        }
+    ]
+}
