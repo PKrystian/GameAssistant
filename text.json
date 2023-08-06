@@ -10,7 +10,8 @@
                 "How's it going"
             ],
             "output": [
-                "Hello! What can I do for you?"
+                "Hello! What can I do for you?",
+                "Greetings! How can i help you?"
             ]
         },
         {

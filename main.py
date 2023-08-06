@@ -1,18 +1,20 @@
 import sys
+import json
 import threading
 import tkinter as tk
 import pyttsx3 as tts
 import speech_recognition as sr
 
-ASSISTANT_NAME = 'circle'
+ASSISTANT_NAME = 'alpha'
 ASSISTANT_COMMAND = f'hey {ASSISTANT_NAME}'
 ASSISTANT_STOP = 'stop'
+INPUT_OUTPUT = 'text.json'
 
 class GameAssistant:
     def __init__(self) -> None:
         self.recognizer = sr.Recognizer()
         self.voice = tts.init()
-        self.voice.setProperty('rate', 200)
+        self.voice.setProperty('rate', 100)
 
         self.root = tk.Tk()
         self.root.title('Game Assistant V3')
@@ -24,6 +26,17 @@ class GameAssistant:
 
         self.root.mainloop()
 
+    def load_responses(filename) -> str:
+        with open(filename, 'r') as file:
+            data = json.load(file)
+        return data
+
+    def find_response(text, data) -> str:
+        for item in data['text']:
+            if text in item['input']:
+                return item['output']
+        return None
+
     def game_assistant_init(self) -> None:
         while True:
             try:
@@ -33,6 +46,8 @@ class GameAssistant:
 
                     text = self.recognizer.recognize_google(audio)
                     text = text.lower()
+
+                    self.label.config(text = text) # Uncomment for testing
 
                     if ASSISTANT_COMMAND in text:
                         self.label.config(text = 'Waiting for command')
@@ -49,11 +64,21 @@ class GameAssistant:
                             sys.exit()
                         else:
                             if text is not None:
-                                self.voice.say('TODO: text.json here')
-                                self.voice.runAndWait()
+                                try:
+                                    data = self.load_responses(INPUT_OUTPUT)
+                                    voice = self.find_response(text, data)
+                                    if voice:
+                                        self.voice.say(voice)
+                                        self.voice.runAndWait()
+                                    else:
+                                        self.voice.say('I\'m sorry, I don\'t understand')
+                                        self.voice.runAndWait()
+                                except FileNotFoundError:
+                                    self.voice.say(f'Couldn\'t find {INPUT_OUTPUT} file')
+                                    self.voice.runAndWait()
                             self.label.config(text = 'Listening')
             except:
-                self.label.config(text = f'Listening ({ASSISTANT_COMMAND} to start)')
+                self.label.config(text = f'Listening, ({ASSISTANT_COMMAND} to start)')
                 continue
 
 GameAssistant()
