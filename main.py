@@ -76,9 +76,16 @@ class GameAssistant:
                                 except FileNotFoundError:
                                     self.voice.say(f'Couldn\'t find {INPUT_OUTPUT} file')
                                     self.voice.runAndWait()
-                            self.label.config(text = 'Listening')
-            except:
-                self.label.config(text = f'Listening, ({ASSISTANT_COMMAND} to start)')
+                                except Exception as e:
+                                    self.voice.say(f"An error occurred: {e}")
+                                    self.voice.runAndWait()
+                            self.label.config(text='Listening')
+            except sr.UnknownValueError:
+                self.label.config(text="Sorry, I didn\'t catch that. Could you please repeat?")
+            except sr.RequestError as e:
+                self.label.config(text=f"Sorry, there was an issue with the speech recognition service: {e}")
+            except Exception as e:
+                self.label.config(text=f"An error occurred: {e}")
                 continue
 
 GameAssistant()
