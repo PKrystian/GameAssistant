@@ -1,4 +1,3 @@
-import sys
 import json
 import threading
 import tkinter as tk
@@ -12,10 +11,10 @@ class Response:
 
 class GameAssistant:
     def __init__(self):
-        self.assistant_name = 'alpha'
-        self.assistant_command = f'hey {self.assistant_name}'
-        self.assistant_stop = 'stop'
-        self.input_output = 'text.json'
+        self.ASSISTANT_NAME = 'alpha'
+        self.ASSISTANT_COMMAND = f'hey {self.ASSISTANT_NAME}'
+        self.ASSISTANT_STOP = 'stop'
+        self.INPUT_OUTPUT = 'text.json'
 
         self.recognizer = sr.Recognizer()
         self.voice = tts.init()
@@ -24,7 +23,7 @@ class GameAssistant:
         self.root = tk.Tk()
         self.root.title('Game Assistant V3')
         self.root.geometry('900x600')
-        self.label = tk.Label(text=f'Listening ({self.assistant_command} to start)')
+        self.label = tk.Label(text=f'Listening ({self.ASSISTANT_COMMAND} to start)')
         self.label.pack()
 
         threading.Thread(target=self.game_assistant_init).start()
@@ -68,25 +67,25 @@ class GameAssistant:
 
                     self.label.config(text=text)  # Uncomment for testing
 
-                    if self.assistant_command in text:
+                    if self.ASSISTANT_COMMAND in text:
                         self.label.config(text='Waiting for command')
                         audio = self.recognizer.listen(source)
 
                         text = self.recognizer.recognize_google(audio)
                         text = text.lower()
 
-                        if text == self.assistant_stop:
+                        if text == self.ASSISTANT_STOP:
                             self.voice.say('Goodbye!')
                             self.voice.runAndWait()
                             self.voice.stop()
                             self.root.destroy()
-                            sys.exit()
+                            return
                         else:
                             try:
-                                responses = self.load_responses(self.input_output)
+                                responses = self.load_responses(self.INPUT_OUTPUT)
                                 self.handle_response(text, responses)
                             except FileNotFoundError:
-                                self.voice.say(f"Couldn't find {self.input_output} file")
+                                self.voice.say(f"Couldn't find {self.INPUT_OUTPUT} file")
                                 self.voice.runAndWait()
                             except Exception as e:
                                 self.voice.say(f"An error occurred: {e}")
